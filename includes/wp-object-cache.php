@@ -70,6 +70,8 @@ class WP_Object_Cache {
 	/** @psalm-var array<array{host: string, port: string}> */
 	public array $connection_errors = [];
 
+	private const NOT_SET_SENTINEL = '__WP_OBJECT_CACHE_NOT_SET__';
+
 	/**
 	 * @global array<string,array<string>>|array<int,string>|null $memcached_servers
 	 * @global string $table_prefix
@@ -139,7 +141,7 @@ class WP_Object_Cache {
 		}
 
 		if ( $this->is_non_persistent_group( $group ) ) {
-			if ( isset( $this->cache[ $key ] ) ) {
+			if ( isset( $this->cache[ $key ] ) && $this->cache[ $key ]['value'] !== self::NOT_SET_SENTINEL ) {
 				return false;
 			}
 
@@ -359,7 +361,7 @@ class WP_Object_Cache {
 			$found = false;
 
 			$this->cache[ $key ] = [
-				'value' => false,
+				'value' => self::NOT_SET_SENTINEL,
 				'found' => false,
 			];
 
