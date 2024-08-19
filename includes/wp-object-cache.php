@@ -231,7 +231,7 @@ class WP_Object_Cache {
 		}
 
 		if ( $this->is_non_persistent_group( $group ) ) {
-			if ( ! isset( $this->cache[ $key ] ) ) {
+			if ( ! isset( $this->cache[ $key ] ) || $this->cache[ $key ]['value'] === self::NOT_SET_SENTINEL ) {
 				return false;
 			}
 
@@ -494,10 +494,11 @@ class WP_Object_Cache {
 		$key = $this->key( $key, $group );
 
 		if ( $this->is_non_persistent_group( $group ) ) {
-			$result = isset( $this->cache[ $key ] );
-			unset( $this->cache[ $key ] );
-
-			return $result;
+			if ( isset( $this->cache[ $key ] ) && $this->cache[ $key ]['value'] !== self::NOT_SET_SENTINEL ) {
+				unset( $this->cache[ $key ] );
+				return true;
+			}
+			return false;
 		}
 
 		$this->timer_start();
