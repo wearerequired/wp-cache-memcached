@@ -986,8 +986,8 @@ class Test_WP_Object_Cache extends WP_UnitTestCase {
 		$this->object_cache->set( 'key1', 'value1', $group );
 		$this->object_cache->set( 'key2', 'value2', $group );
 
-		// Test 1: Verify that flush(  ) clears non-persistent group data
-		$this->assertTrue( $this->object_cache->flush(  ) );
+		// Test 1: Verify that flush() clears non-persistent group data
+		$this->assertTrue( $this->object_cache->flush() );
 		$this->assertFalse( $this->object_cache->get( 'key1', $group ) );
 		$this->assertFalse( $this->object_cache->get( 'key2', $group ) );
 
@@ -996,7 +996,7 @@ class Test_WP_Object_Cache extends WP_UnitTestCase {
 		$this->object_cache->set( 'key2', 'value2', $group );
 
 		// Test 2: Verify that flush_runtime( ) clears non-persistent group data
-		$this->assertTrue( $this->object_cache->flush_runtime(  ) );
+		$this->assertTrue( $this->object_cache->flush_runtime() );
 		$this->assertFalse( $this->object_cache->get( 'key1', $group ) );
 		$this->assertFalse( $this->object_cache->get( 'key2', $group ) );
 	}
@@ -1005,7 +1005,7 @@ class Test_WP_Object_Cache extends WP_UnitTestCase {
 		$group = 'non_persistent_group';
 		$this->object_cache->add_non_persistent_groups( $group );
 
-		// Test 1: replace(  ) should fail for a non-existent key
+		// Test 1: Replace should fail for a non-existent key
 		$this->assertFalse( $this->object_cache->replace( 'non_existent_key', 'some_value', $group ) );
 
 		// Test 2: Set a value, then replace it
@@ -1013,7 +1013,7 @@ class Test_WP_Object_Cache extends WP_UnitTestCase {
 		$this->assertTrue( $this->object_cache->replace( 'test_key', 'replaced_value', $group ) );
 		$this->assertEquals( 'replaced_value', $this->object_cache->get( 'test_key', $group ) );
 
-		// Test 3: Attempt to replace after a failed get ( which would set NOT_SET_SENTINEL internally )
+		// Test 3: Attempt to replace after a failed get
 		$this->assertFalse( $this->object_cache->get( 'another_key', $group ) );
 		$this->assertFalse( $this->object_cache->replace( 'another_key', 'new_value', $group ) );
 
