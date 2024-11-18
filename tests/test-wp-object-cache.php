@@ -933,13 +933,18 @@ class Test_WP_Object_Cache extends WP_UnitTestCase {
 			$this->assertFalse( $results[$key] );
 		}
 
-		// Test 2: Verify set_multiple and get_multiple
+		// Test 2: Verify an add() and a following get() still work
+		$add_result = $this->object_cache->add( 'key1', 'value', $group );
+		$get_result = $this->object_cache->get( 'key1', $group );
+		$this->assertEquals( 'value', $get_result, 'Data should be retrieved immediately after adding to non-persistent group' );
+
+		// Test 3: Verify set_multiple and get_multiple
 		$data = ['key1' => 'value1', 'key2' => 'value2'];
 		$this->assertEquals( $data, $this->object_cache->set_multiple( $data, $group ) );
 		$results = $this->object_cache->get_multiple( array_keys( $data ), $group );
 		$this->assertEquals( $data, $results );
 
-		// Test 3: Verify delete_multiple
+		// Test 4: Verify delete_multiple
 		$this->assertEquals(
 			['key1' => true, 'key2' => true],
 			$this->object_cache->delete_multiple( array_keys( $data ), $group )
