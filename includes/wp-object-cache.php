@@ -70,8 +70,6 @@ class WP_Object_Cache {
 	/** @psalm-var array<array{host: string, port: string}> */
 	public array $connection_errors = [];
 
-	private const NOT_SET_SENTINEL = '__WP_OBJECT_CACHE_NOT_SET__';
-
 	/**
 	 * @global array<string,array<string>>|array<int,string>|null $memcached_servers
 	 * @global string $table_prefix
@@ -141,7 +139,7 @@ class WP_Object_Cache {
 		}
 
 		if ( $this->is_non_persistent_group( $group ) ) {
-			if ( isset( $this->cache[ $key ] ) && $this->cache[ $key ]['value'] !== self::NOT_SET_SENTINEL ) {
+			if ( isset( $this->cache[ $key ] ) ) {
 				return false;
 			}
 
@@ -231,7 +229,7 @@ class WP_Object_Cache {
 		}
 
 		if ( $this->is_non_persistent_group( $group ) ) {
-			if ( ! isset( $this->cache[ $key ] ) || $this->cache[ $key ]['value'] === self::NOT_SET_SENTINEL ) {
+			if ( ! isset( $this->cache[ $key ] ) ) {
 				return false;
 			}
 
@@ -356,15 +354,9 @@ class WP_Object_Cache {
 			return $value;
 		}
 
+		// For a non-persistant group, if it's not in local cache then it just doesn't exist.
 		if ( $this->is_non_persistent_group( $group ) ) {
-			// This is a bit suboptimal, but keeping for back-compat for now.
 			$found = false;
-
-			$this->cache[ $key ] = [
-				'value' => self::NOT_SET_SENTINEL,
-				'found' => false,
-			];
-
 			$this->group_ops_stats( 'get_local', $key, $group, null, null, 'not_in_local' );
 
 			return false;
@@ -417,12 +409,7 @@ class WP_Object_Cache {
 
 				$this->group_ops_stats( 'get_local', $cache_key, $group, null, null, 'local' );
 			} elseif ( $this->is_non_persistent_group( $group ) ) {
-				$return[ $key ]             = false;
-				$return_cache[ $cache_key ] = [
-					'value' => false,
-					'found' => false,
-				];
-
+				$return[ $key ] = false;
 				$this->group_ops_stats( 'get_local', $cache_key, $group, null, null, 'not_in_local' );
 			} else {
 				$uncached_keys[ $key ] = $cache_key;
@@ -494,11 +481,10 @@ class WP_Object_Cache {
 		$key = $this->key( $key, $group );
 
 		if ( $this->is_non_persistent_group( $group ) ) {
-			if ( isset( $this->cache[ $key ] ) && $this->cache[ $key ]['value'] !== self::NOT_SET_SENTINEL ) {
-				unset( $this->cache[ $key ] );
-				return true;
-			}
-			return false;
+			$result = isset( $this->cache[ $key ] );
+			unset( $this->cache[ $key ] );
+
+			return $result;
 		}
 
 		$this->timer_start();
